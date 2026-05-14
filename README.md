@@ -17,10 +17,10 @@ Welcome to the Cardano SPO workshop. This repository contains everything you nee
 ## Session Architecture
 
 ```
-┌──────────────┐        ┌──────────────────────┐
+┌──────────────┐        ┌─────────────────────-─┐
 │  Relay Node  │◄──────►│  Block-Producing Node │
 │  public IP   │        │  private / firewalled │
-└──────────────┘        └──────────────────────┘
+└──────────────┘        └─────────────────────-─┘
         │                         │
         └──────── Internet ───────┘
                 registered on
