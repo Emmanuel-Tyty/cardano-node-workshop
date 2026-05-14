@@ -1,0 +1,54 @@
+services:
+  cardano-relay:
+    image: ghcr.io/intersectmbo/cardano-node:10.1.4
+    container_name: cardano-relay
+    environment:
+      - NETWORK=preview
+      - CARDANO_NODE_SOCKET_PATH=/ipc/node.socket
+    volumes:
+      - cardano-relay-data:/data/db
+      - cardano-relay-ipc:/ipc
+      - ~/cardano-workshop:/workspace
+    working_dir: /workspace
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+
+  cardano-bp:
+    image: ghcr.io/intersectmbo/cardano-node:10.1.4
+    container_name: cardano-bp
+    environment:
+      - NETWORK=preview
+      - CARDANO_NODE_SOCKET_PATH=/ipc/bp.socket
+    volumes:
+      - cardano-bp-data:/data/db
+      - cardano-bp-ipc:/ipc
+      - ~/cardano-workshop:/workspace
+      - ./docker/bp-topology.json:/config/topology.json:ro
+    working_dir: /workspace
+    restart: unless-stopped
+    command: >
+      run
+      --config /opt/cardano/config/preview/config.json
+      --topology /config/topology.json
+      --database-path /data/db
+      --socket-path /ipc/bp.socket
+      --shelley-kes-key /workspace/bp-keys/kes.skey
+      --shelley-vrf-key /workspace/bp-keys/vrf.skey
+      --shelley-operational-certificate /workspace/bp-keys/node.cert
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+
+volumes:
+  cardano-relay-data:
+  cardano-relay-ipc:
+  cardano-bp-data:
+  cardano-bp-ipc:
