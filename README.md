@@ -14,15 +14,3 @@ Welcome to the Cardano SPO workshop. This repository contains everything you nee
 - `bootstrap-mithril.sh`: Automation script for fast node syncing.
 - `docker-compose.yml`: Consolidated Docker setup for both Relay and BP nodes.
 
-## Session Architecture
-
-```
-┌──────────────┐        ┌─────────────────────-─┐
-│  Relay Node  │◄──────►│  Block-Producing Node │
-│  public IP   │        │  private / firewalled │
-└──────────────┘        └─────────────────────-─┘
-        │                         │
-        └──────── Internet ───────┘
-                registered on
-                 Preview testnet
-```
