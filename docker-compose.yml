@@ -38,9 +38,9 @@ services:
       --topology /config/topology.json
       --database-path /data/db
       --socket-path /ipc/bp.socket
-      --shelley-kes-key /workspace/bp-keys/kes.skey
-      --shelley-vrf-key /workspace/bp-keys/vrf.skey
-      --shelley-operational-certificate /workspace/bp-keys/node.cert
+      --shelley-kes-key /workspace/keys/bp-keys/kes.skey
+      --shelley-vrf-key /workspace/keys/bp-keys/vrf.skey
+      --shelley-operational-certificate /workspace/keys/bp-keys/node.cert
     logging:
       driver: "json-file"
       options:

@@ -77,7 +77,7 @@ docker exec cardano-relay cardano-cli query tip \
 ## 6. Create Your Workspace Directories
 
 ```bash
-mkdir -p ~/cardano-workshop/{keys,transactions,pool-keys}
+mkdir -p ~/cardano-workshop/{transactions,keys/{cold-keys,bp-keys,pool-keys}}
 ```
 
 ---

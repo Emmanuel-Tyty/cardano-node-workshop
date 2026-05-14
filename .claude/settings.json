@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /Users/tyty/Desktop/cardano-spo-workshop remote -v)",
+      "Bash(git -C /Users/tyty/Desktop/cardano-spo-workshop remote rename origin cardano-node-workshop)",
+      "Bash(docker --version)",
+      "Bash(docker compose *)",
+      "Bash(docker rmi *)",
+      "Bash(docker exec -w /workspace cardano-relay cardano-cli address build \\\\ *)",
+      "Read(//Users/tyty/cardano-workshop/keys/**)",
+      "Bash(bash bootstrap-mithril.sh)",
+      "Bash(docker system *)",
+      "Bash(docker volume *)"
+    ]
+  }
+}

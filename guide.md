@@ -65,24 +65,24 @@ Now that your relay is running, you will generate the keys and certificates requ
 Set up your workspace and generate the required keys.
 
 ```bash
-mkdir -p ~/cardano-workshop/{cold-keys,bp-keys,pool-keys}
+mkdir -p ~/cardano-workshop/keys/{cold-keys,bp-keys,pool-keys}
 alias ccli='docker exec -w /workspace cardano-relay cardano-cli'
 
 # Generate Cold keys
 ccli node key-gen \
-  --cold-verification-key-file cold-keys/cold.vkey \
-  --cold-signing-key-file      cold-keys/cold.skey \
-  --operational-certificate-issue-counter cold-keys/cold.counter
+  --cold-verification-key-file keys/cold-keys/cold.vkey \
+  --cold-signing-key-file      keys/cold-keys/cold.skey \
+  --operational-certificate-issue-counter keys/cold-keys/cold.counter
 
 # Generate KES keys
 ccli node key-gen-KES \
-  --verification-key-file bp-keys/kes.vkey \
-  --signing-key-file      bp-keys/kes.skey
+  --verification-key-file keys/bp-keys/kes.vkey \
+  --signing-key-file      keys/bp-keys/kes.skey
 
 # Generate VRF keys
 ccli node key-gen-VRF \
-  --verification-key-file bp-keys/vrf.vkey \
-  --signing-key-file      bp-keys/vrf.skey
+  --verification-key-file keys/bp-keys/vrf.vkey \
+  --signing-key-file      keys/bp-keys/vrf.skey
 ```
 
 ### 3. Issue Operational Certificate
@@ -95,11 +95,11 @@ CURRENT_SLOT=$(ccli query tip --testnet-magic 2 | python3 -c \
 KES_PERIOD=$((CURRENT_SLOT / 129600))
 
 ccli node issue-op-cert \
-  --kes-verification-key-file             bp-keys/kes.vkey \
-  --cold-signing-key-file                 cold-keys/cold.skey \
-  --operational-certificate-issue-counter cold-keys/cold.counter \
+  --kes-verification-key-file             keys/bp-keys/kes.vkey \
+  --cold-signing-key-file                 keys/cold-keys/cold.skey \
+  --operational-certificate-issue-counter keys/cold-keys/cold.counter \
   --kes-period $KES_PERIOD \
-  --out-file bp-keys/node.cert
+  --out-file keys/bp-keys/node.cert
 ```
 
 ### 4. Start the Block-Producing Node
@@ -108,7 +108,7 @@ The block producer (BP) node connects only to your relay and uses your signing k
 
 ```bash
 # Copy keys to the BP mount point
-cp bp-keys/* ~/cardano-workshop/bp-keys/
+cp keys/bp-keys/* ~/cardano-workshop/keys/bp-keys/
 
 # Start the BP node
 docker compose up -d cardano-bp
@@ -121,13 +121,13 @@ Generate stake keys and create the registration certificates.
 ```bash
 # Generate stake keys
 ccli stake-address key-gen \
-  --verification-key-file pool-keys/stake.vkey \
-  --signing-key-file      pool-keys/stake.skey
+  --verification-key-file keys/pool-keys/stake.vkey \
+  --signing-key-file      keys/pool-keys/stake.skey
 
 ccli stake-address build \
-  --stake-verification-key-file pool-keys/stake.vkey \
+  --stake-verification-key-file keys/pool-keys/stake.vkey \
   --testnet-magic 2 \
-  --out-file pool-keys/stake.addr
+  --out-file keys/pool-keys/stake.addr
 
 # Create pool registration certificate
 # Replace HOST_A_IP with your relay's public IP
@@ -136,23 +136,23 @@ RELAY_PORT=3001
 
 ccli stake-pool registration-certificate \
   --cold-verification-key-file cold-keys/cold.vkey \
-  --vrf-verification-key-file  bp-keys/vrf.vkey \
+  --vrf-verification-key-file  keys/bp-keys/vrf.vkey \
   --pool-pledge 100000000 \
   --pool-cost   340000000 \
   --pool-margin 0.01 \
-  --pool-reward-account-verification-key-file pool-keys/stake.vkey \
-  --pool-owner-stake-verification-key-file    pool-keys/stake.vkey \
+  --pool-reward-account-verification-key-file keys/pool-keys/stake.vkey \
+  --pool-owner-stake-verification-key-file    keys/pool-keys/stake.vkey \
   --testnet-magic 2 \
   --pool-relay-ipv4 $RELAY_HOST \
   --pool-relay-port $RELAY_PORT \
   --metadata-url "https://example.com/poolmeta.json" \
   --metadata-hash "0000000000000000000000000000000000000000000000000000000000000000" \
-  --out-file pool-keys/pool.cert
+  --out-file keys/pool-keys/pool.cert
 
 # Create stake address registration certificate
 ccli stake-address registration-certificate \
-  --stake-verification-key-file pool-keys/stake.vkey \
-  --out-file pool-keys/stake-reg.cert
+  --stake-verification-key-file keys/pool-keys/stake.vkey \
+  --out-file keys/pool-keys/stake-reg.cert
 ```
 
 ### 6. Submit Registration Transaction
@@ -170,8 +170,8 @@ ccli transaction build \
   --testnet-magic 2 \
   --tx-in "$UTXO" \
   --change-address $PAYMENT_ADDR \
-  --certificate-file pool-keys/stake-reg.cert \
-  --certificate-file pool-keys/pool.cert \
+  --certificate-file keys/pool-keys/stake-reg.cert \
+  --certificate-file keys/pool-keys/pool.cert \
   --witness-override 3 \
   --out-file /tmp/reg.txbody
 
@@ -179,8 +179,8 @@ ccli transaction build \
 ccli transaction sign \
   --tx-body-file /tmp/reg.txbody \
   --signing-key-file keys/payment.skey \
-  --signing-key-file pool-keys/stake.skey \
-  --signing-key-file cold-keys/cold.skey \
+  --signing-key-file keys/pool-keys/stake.skey \
+  --signing-key-file keys/cold-keys/cold.skey \
   --testnet-magic 2 \
   --out-file /tmp/reg.tx
 
@@ -194,7 +194,7 @@ Find your Pool ID and check it on the explorer.
 
 ```bash
 ccli stake-pool id \
-  --cold-verification-key-file cold-keys/cold.vkey \
+  --cold-verification-key-file keys/cold-keys/cold.vkey \
   --output-format hex
 ```
 
