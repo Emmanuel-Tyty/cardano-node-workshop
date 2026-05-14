@@ -2,6 +2,8 @@
 
 This guide walks you through setting up a Cardano relay node and registering a stake pool on the Preview testnet.
 
+> **Before you begin:** Complete the [Attendee Pre-requisites Checklist](attendee-prereqs.md) — your node must be synced to ≥90% before you can submit transactions.
+
 ---
 
 ## Part 1: Relay Node Setup
