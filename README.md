@@ -9,8 +9,8 @@ Welcome to the Cardano SPO workshop. This repository contains everything you nee
 
 ## Key Files
 
-- `guide.md`: The consolidated workshop instructions.
-- `attendee-prereqs.md`: System requirements and pre-sync instructions.
-- `bootstrap-mithril.sh`: Automation script for fast node syncing.
-- `docker-compose.yml`: Consolidated Docker setup for both Relay and BP nodes.
+- [guide.md](guide.md): The consolidated workshop instructions.
+- [attendee-prereqs.md](attendee-prereqs.md): System requirements and pre-sync instructions.
+- [bootstrap-mithril.sh](bootstrap-mithril.sh): Automation script for fast node syncing.
+- [docker-compose.yml](docker-compose.yml): Consolidated Docker setup for both Relay and BP nodes.
 
