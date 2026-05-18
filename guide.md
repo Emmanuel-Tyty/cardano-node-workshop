@@ -66,7 +66,7 @@ Set up your workspace and generate the required keys.
 
 ```bash
 mkdir -p keys/{cold-keys,bp-keys,pool-keys} transactions
-alias ccli='docker exec -w /workspace cardano-relay cardano-cli'
+alias ccli='docker exec -w /workspace cardano-relay cardano-cli latest'
 
 # Generate Cold keys
 ccli node key-gen \
