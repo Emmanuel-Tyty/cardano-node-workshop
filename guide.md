@@ -210,15 +210,26 @@ ccli transaction submit --tx-file /workspace/transactions/reg.tx --testnet-magic
 
 ### 8. Verify Your Pool
 
-Find your Pool ID and check it on the explorer.
+Generate your Pool ID in both formats and save to files.
 
 ```bash
-ccli stake-pool id \
+# Hex format (used in scripts and APIs)
+docker exec -w /workspace cardano-relay cardano-cli latest stake-pool id \
   --cold-verification-key-file keys/cold-keys/cold.vkey \
-  --output-format hex
+  --output-format hex > keys/pool-keys/pool.id
+
+# Bech32 format (human-readable, used in explorers and wallets)
+docker exec -w /workspace cardano-relay cardano-cli latest stake-pool id \
+  --cold-verification-key-file keys/cold-keys/cold.vkey \
+  --output-format bech32 > keys/pool-keys/pool.id.bech32
+
+cat keys/pool-keys/pool.id
+cat keys/pool-keys/pool.id.bech32
 ```
 
-Explorer: `https://preview.cardanoscan.io/pool/<YOUR_POOL_ID>`
+Check on the explorer using the bech32 ID:
+
+`https://preview.cardanoscan.io/pool/$(cat keys/pool-keys/pool.id.bech32)`
 
 ---
 
@@ -231,3 +242,18 @@ KES keys expire every ~90 days. You must generate a new KES key and issue a new 
 Check your node health regularly:
 - Sync status: `ccli query tip --testnet-magic 2`
 - Peer connections: `ccli query peer-info --testnet-magic 2`
+
+---
+
+## Troubleshooting
+
+### Mithril: "Unpack directory 'db' is not empty"
+
+This happens when the relay container was restarted while Mithril was mid-download, leaving partial data that blocks the next attempt. Fix: destroy the volume and start clean.
+
+```bash
+docker compose down -v
+docker compose up -d cardano-relay
+```
+
+Do not manually restart the relay while Mithril is downloading.
