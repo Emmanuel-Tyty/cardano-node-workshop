@@ -15,7 +15,7 @@ A relay node is the public-facing entry point for your stake pool. It handles ne
 The workshop uses Docker to simplify the installation.
 
 ```bash
-cd cardano-cli-demo/workshop
+cd cardano-node-workshop
 docker compose up -d cardano-relay
 ```
 
@@ -65,7 +65,7 @@ Now that your relay is running, you will generate the keys and certificates requ
 Set up your workspace and generate the required keys.
 
 ```bash
-mkdir -p ~/cardano-workshop/keys/{cold-keys,bp-keys,pool-keys}
+mkdir -p keys/{cold-keys,bp-keys,pool-keys}
 alias ccli='docker exec -w /workspace cardano-relay cardano-cli'
 
 # Generate Cold keys
@@ -107,14 +107,37 @@ ccli node issue-op-cert \
 The block producer (BP) node connects only to your relay and uses your signing keys to mint blocks.
 
 ```bash
-# Copy keys to the BP mount point
-cp keys/bp-keys/* ~/cardano-workshop/keys/bp-keys/
-
-# Start the BP node
 docker compose up -d cardano-bp
 ```
 
-### 5. Pool Registration
+### 5. Generate Payment Keys
+
+You need a funded payment address to pay the pool deposit and transaction fees.
+
+```bash
+ccli address key-gen \
+  --verification-key-file keys/payment.vkey \
+  --signing-key-file      keys/payment.skey
+
+ccli address build \
+  --payment-verification-key-file keys/payment.vkey \
+  --testnet-magic 2 \
+  --out-file keys/payment.addr
+
+cat keys/payment.addr
+```
+
+Fund the address from the Preview faucet: https://docs.cardano.org/cardano-testnets/tools/faucet/
+
+Wait a few minutes, then confirm the funds arrived:
+
+```bash
+ccli query utxo \
+  --address $(cat keys/payment.addr) \
+  --testnet-magic 2
+```
+
+### 6. Pool Registration
 
 Generate stake keys and create the registration certificates.
 
@@ -129,13 +152,13 @@ ccli stake-address build \
   --testnet-magic 2 \
   --out-file keys/pool-keys/stake.addr
 
-# Create pool registration certificate
-# Replace HOST_A_IP with your relay's public IP
-RELAY_HOST="ENTER_RELAY_IP"
+# Get your relay's public IP
+RELAY_HOST=$(curl -4 -s ifconfig.me)
 RELAY_PORT=3001
+echo "Relay IP: $RELAY_HOST"
 
 ccli stake-pool registration-certificate \
-  --cold-verification-key-file cold-keys/cold.vkey \
+  --cold-verification-key-file keys/cold-keys/cold.vkey \
   --vrf-verification-key-file  keys/bp-keys/vrf.vkey \
   --pool-pledge 100000000 \
   --pool-cost   340000000 \
@@ -155,7 +178,7 @@ ccli stake-address registration-certificate \
   --out-file keys/pool-keys/stake-reg.cert
 ```
 
-### 6. Submit Registration Transaction
+### 7. Submit Registration Transaction
 
 Submit the certificates to the blockchain. This requires three signatures: your payment key, your stake key, and your cold key.
 
@@ -173,22 +196,22 @@ ccli transaction build \
   --certificate-file keys/pool-keys/stake-reg.cert \
   --certificate-file keys/pool-keys/pool.cert \
   --witness-override 3 \
-  --out-file /tmp/reg.txbody
+  --out-file /workspace/transactions/reg.txbody
 
 # Sign transaction
 ccli transaction sign \
-  --tx-body-file /tmp/reg.txbody \
+  --tx-body-file /workspace/transactions/reg.txbody \
   --signing-key-file keys/payment.skey \
   --signing-key-file keys/pool-keys/stake.skey \
   --signing-key-file keys/cold-keys/cold.skey \
   --testnet-magic 2 \
-  --out-file /tmp/reg.tx
+  --out-file /workspace/transactions/reg.tx
 
 # Submit
-ccli transaction submit --tx-file /tmp/reg.tx --testnet-magic 2
+ccli transaction submit --tx-file /workspace/transactions/reg.tx --testnet-magic 2
 ```
 
-### 7. Verify Your Pool
+### 8. Verify Your Pool
 
 Find your Pool ID and check it on the explorer.
 

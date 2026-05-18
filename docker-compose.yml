@@ -8,7 +8,7 @@ services:
     volumes:
       - cardano-relay-data:/data/db
       - cardano-relay-ipc:/ipc
-      - ~/cardano-workshop:/workspace
+      - .:/workspace
     working_dir: /workspace
     ports:
       - "3001:3001"
@@ -28,8 +28,8 @@ services:
     volumes:
       - cardano-bp-data:/data/db
       - cardano-bp-ipc:/ipc
-      - ~/cardano-workshop:/workspace
-      - ./docker/bp-topology.json:/config/topology.json:ro
+      - .:/workspace
+      - ./bp-topology.json:/config/topology.json:ro
     working_dir: /workspace
     restart: unless-stopped
     command: >

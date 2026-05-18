@@ -9,6 +9,7 @@
         }
       ],
       "advertise": false,
+      "trustable": true,
       "valency": 1,
       "warmValency": 1
     }

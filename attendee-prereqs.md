@@ -49,7 +49,6 @@ The node must reach >90% sync before you can submit transactions.
 Run this and let it sync overnight:
 
 ```bash
-cd cardano-cli-demo/workshop
 docker compose up -d cardano-relay
 
 # Watch sync progress (Ctrl+C to stop watching, node keeps running)
@@ -77,7 +76,7 @@ docker exec cardano-relay cardano-cli query tip \
 ## 6. Create Your Workspace Directories
 
 ```bash
-mkdir -p ~/cardano-workshop/{transactions,keys/{cold-keys,bp-keys,pool-keys}}
+mkdir -p {transactions,keys/{cold-keys,bp-keys,pool-keys}}
 ```
 
 ---
@@ -103,7 +102,7 @@ docker exec -w /workspace cardano-relay cardano-cli address build \
   --testnet-magic 2 \
   --out-file /workspace/keys/payment.addr
 
-cat ~/cardano-workshop/keys/payment.addr
+cat keys/payment.addr
 ```
 
 Paste that address into the faucet to receive test ADA.
@@ -119,13 +118,11 @@ If you're reading this the morning of the workshop and your node hasn't synced, 
 
 **For Linux / macOS / WSL2:**
 ```bash
-cd cardano-cli-demo/workshop
 bash bootstrap-mithril.sh
 ```
 
 **For Windows (PowerShell):**
 ```powershell
-cd cardano-cli-demo/workshop
 .\bootstrap-mithril.ps1
 ```
 
@@ -147,7 +144,7 @@ docker exec cardano-relay cardano-cli query tip \
 
 Once your node is synced, you are ready to start the [Workshop Guide](guide.md).
 
-## 9. Quick Sanity Check Before the Session
+## 10. Quick Sanity Check Before the Session
 
 Run this the morning of the workshop:
 
