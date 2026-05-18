@@ -38,7 +38,7 @@ docker compose version     # need 2+
 
 ```bash
 git clone https://github.com/Emmanuel-Tyty/cardano-node-workshop.git
-cd cardano-node-workshop/workshop
+cd cardano-node-workshop
 ```
 
 ---
