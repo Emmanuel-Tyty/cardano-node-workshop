@@ -1,7 +1,6 @@
 services:
   cardano-relay:
-    image: ghcr.io/intersectmbo/cardano-node:10.1.4
-    platform: linux/amd64
+    image: ghcr.io/blinklabs-io/cardano-node:11.0.1-1
     container_name: cardano-relay
     environment:
       - NETWORK=preview
@@ -25,12 +24,11 @@ services:
         max-file: "10"
 
   cardano-bp:
-    image: ghcr.io/intersectmbo/cardano-node:10.1.4
-    platform: linux/amd64
+    image: ghcr.io/blinklabs-io/cardano-node:11.0.1-1
     container_name: cardano-bp
     environment:
       - CARDANO_NODE_SOCKET_PATH=/ipc/bp.socket
-      - CARDANO_CONFIG=/workspace/docker/preview-config.json
+      - CARDANO_NETWORK=preview
       - CARDANO_TOPOLOGY=/workspace/docker/bp-topology.json
       - CARDANO_DATABASE_PATH=/data/db
       - CARDANO_SOCKET_PATH=/ipc/bp.socket

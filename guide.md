@@ -12,38 +12,34 @@ A relay node is the public-facing entry point for your stake pool. It handles ne
 
 ### 1. Start the Relay Node
 
-The workshop uses Docker to simplify the installation.
+The workshop uses Docker to simplify the installation. The image includes a built-in Mithril client — on first start it automatically downloads a cryptographically verified chain snapshot so you reach sync in minutes instead of hours.
 
 ```bash
 cd cardano-node-workshop
 docker compose up -d cardano-relay
 ```
 
-### 2. Fast Sync with Mithril (Optional but Recommended)
-
-Syncing from scratch can take several hours. Use this script to download a verified snapshot in minutes.
+Follow the sync progress in the logs:
 
 ```bash
-# For Linux / macOS / WSL2
-bash bootstrap-mithril.sh
-
-# For Windows (PowerShell)
-.\bootstrap-mithril.ps1
+docker compose logs -f cardano-relay
 ```
 
-### 3. Verify the Node
+You will see Mithril downloading the snapshot. Once that finishes the node starts and begins validating. Move on to Part 2 while it syncs.
 
-Check the sync progress. You want `syncProgress` to reach `1.00`.
+### 2. Verify the Node
+
+Check the sync progress. You want `syncProgress` to reach `"1.00"` before submitting transactions.
 
 ```bash
 docker exec cardano-relay cardano-cli query tip \
   --socket-path /ipc/node.socket --testnet-magic 2
 ```
 
-### 4. Configuration Files
+### 3. Configuration Files
 
-The node image automatically downloads configuration for the Preview testnet:
-- `config.json`: Node behavior and logging.
+The node image bundles configuration for all major Cardano networks. For Preview testnet it uses:
+- `config.json`: Node behaviour and logging.
 - `topology.json`: Peer-to-peer connection settings.
 - `genesis.json`: Initial state of the network.
 
@@ -102,15 +98,7 @@ ccli node issue-op-cert \
   --out-file keys/bp-keys/node.cert
 ```
 
-### 4. Start the Block-Producing Node
-
-The block producer (BP) node connects only to your relay and uses your signing keys to mint blocks.
-
-```bash
-docker compose up -d cardano-bp
-```
-
-### 5. Generate Payment Keys
+### 4. Generate Payment Keys
 
 You need a funded payment address to pay the pool deposit and transaction fees.
 
@@ -135,6 +123,14 @@ Wait a few minutes, then confirm the funds arrived:
 ccli query utxo \
   --address $(cat keys/payment.addr) \
   --testnet-magic 2
+```
+
+### 5. Start the Block-Producing Node
+
+The block producer (BP) node connects only to your relay and uses your signing keys to mint blocks. Like the relay, it auto-bootstraps via Mithril on first start.
+
+```bash
+docker compose up -d cardano-bp
 ```
 
 ### 6. Pool Registration

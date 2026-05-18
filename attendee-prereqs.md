@@ -1,7 +1,7 @@
 # Before the Workshop — Attendee Checklist
 
 Please complete everything here **the day before** the session. The node sync alone takes
-several hours and cannot be done live.
+time and cannot be done live.
 
 ---
 
@@ -45,15 +45,19 @@ cd cardano-node-workshop
 
 ## 4. Start Syncing the Node NOW (do this today)
 
-The node must reach >90% sync before you can submit transactions.
-Run this and let it sync overnight:
+The node image includes a built-in Mithril client. On first start it automatically downloads
+a cryptographically verified chain snapshot — sync takes 15–45 minutes instead of hours.
+
+Start the relay and leave it running overnight:
 
 ```bash
 docker compose up -d cardano-relay
+```
 
-# Watch sync progress (Ctrl+C to stop watching, node keeps running)
-watch -n 10 'docker exec cardano-relay cardano-cli query tip \
-  --socket-path /ipc/node.socket --testnet-magic 2'
+Watch the Mithril download and subsequent sync progress:
+
+```bash
+docker compose logs -f cardano-relay
 ```
 
 You want `syncProgress` to show `"1.00"` before the session starts.
@@ -87,20 +91,20 @@ During Part 2 you will need ~1000 test-ADA to register your pool.
 Get funds from the Preview faucet before the session:
 https://docs.cardano.org/cardano-testnets/tools/faucet/
 
-You need your wallet address first — Host B will generate one live, but if you want
-to follow along you can generate yours ahead of time:
+You need your wallet address first — it will be generated live, but if you want
+to follow along ahead of time:
 
 ```bash
 # Generate payment keys
-docker exec -w /workspace cardano-relay cardano-cli address key-gen \
-  --verification-key-file /workspace/keys/payment.vkey \
-  --signing-key-file /workspace/keys/payment.skey
+docker exec -w /workspace cardano-relay cardano-cli latest address key-gen \
+  --verification-key-file keys/payment.vkey \
+  --signing-key-file      keys/payment.skey
 
 # Build address
-docker exec -w /workspace cardano-relay cardano-cli address build \
-  --payment-verification-key-file /workspace/keys/payment.vkey \
+docker exec -w /workspace cardano-relay cardano-cli latest address build \
+  --payment-verification-key-file keys/payment.vkey \
   --testnet-magic 2 \
-  --out-file /workspace/keys/payment.addr
+  --out-file keys/payment.addr
 
 cat keys/payment.addr
 ```
@@ -109,42 +113,13 @@ Paste that address into the faucet to receive test ADA.
 
 ---
 
-## 8. Didn't Sync Overnight? Use Mithril Instead
-
-If you're reading this the morning of the workshop and your node hasn't synced, use the provided automation script. It downloads a cryptographically verified snapshot signed by SPOs — sync goes from 4–8 hours down to 15–45 minutes depending on your connection.
-
-> [!TIP]
-> **Windows Users**: We strongly recommend using **WSL2 (Ubuntu)** for this workshop. If you are using native PowerShell, use the `.ps1` version of the script.
-
-**For Linux / macOS / WSL2:**
-```bash
-bash bootstrap-mithril.sh
-```
-
-**For Windows (PowerShell):**
-```powershell
-.\bootstrap-mithril.ps1
-```
-
-The script will automatically:
-1. Detect your OS.
-2. Install the Mithril client if needed.
-3. Download the latest Preview snapshot (idempotent).
-4. Restore it into your Docker volumes and restart the relay.
-
-Verify that your node is synced:
-```bash
-docker exec cardano-relay cardano-cli query tip \
-  --socket-path /ipc/node.socket --testnet-magic 2
-```
-
----
-
-## 9. Ready for the Workshop?
+## 8. Ready for the Workshop?
 
 Once your node is synced, you are ready to start the [Workshop Guide](guide.md).
 
-## 10. Quick Sanity Check Before the Session
+---
+
+## 9. Quick Sanity Check Before the Session
 
 Run this the morning of the workshop:
 
@@ -154,7 +129,7 @@ docker exec cardano-relay cardano-cli query tip \
   | python3 -c "import sys,json; d=json.load(sys.stdin); print('Sync:', d['syncProgress'])"
 ```
 
-If sync is below 0.90 and you have less than an hour, use the Mithril steps above.
+If sync is below 0.90 the node is still catching up — give it more time.
 
 ---
 
