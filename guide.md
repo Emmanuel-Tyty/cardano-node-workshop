@@ -106,16 +106,28 @@ You need a funded payment address to pay the pool deposit and transaction fees.
 ccli address key-gen \
   --verification-key-file keys/payment.vkey \
   --signing-key-file      keys/payment.skey
+```
 
+Build two addresses — an enterprise address to receive faucet funds, and a base address that combines the payment key with your stake key. The base address is what makes your ADA count toward pledge.
+
+```bash
+# Enterprise address (for faucet funding)
 ccli address build \
   --payment-verification-key-file keys/payment.vkey \
   --testnet-magic 2 \
   --out-file keys/payment.addr
 
+# Base address (payment + stake — required for pledge)
+ccli address build \
+  --payment-verification-key-file keys/payment.vkey \
+  --stake-verification-key-file   keys/pool-keys/stake.vkey \
+  --testnet-magic 2 \
+  --out-file keys/base.addr
+
 cat keys/payment.addr
 ```
 
-Fund the address from the Preview faucet: https://docs.cardano.org/cardano-testnets/tools/faucet/
+Fund the enterprise address from the Preview faucet: https://docs.cardano.org/cardano-testnets/tools/faucet/
 
 Wait a few minutes, then confirm the funds arrived:
 
@@ -229,7 +241,46 @@ ccli transaction sign \
 ccli transaction submit --tx-file /workspace/transactions/reg.tx --testnet-magic 2
 ```
 
-### 8. Verify Your Pool
+### 8. Delegate Stake and Fulfil the Pledge
+
+Your pool is registered but Active Pledge will show 0 until your stake key is delegated to your own pool and your base address holds enough ADA to cover the committed pledge (100 ADA).
+
+```bash
+# Create the delegation certificate
+ccli stake-address stake-delegation-certificate \
+  --stake-verification-key-file keys/pool-keys/stake.vkey \
+  --stake-pool-id $(cat keys/pool-keys/pool.id) \
+  --out-file keys/pool-keys/deleg.cert
+
+# Get current UTxO
+PAYMENT_ADDR=$(cat keys/payment.addr)
+ccli query utxo --address $PAYMENT_ADDR --testnet-magic 2
+
+# Build: send 200 ADA to base address + submit delegation cert
+UTXO="TX_HASH#TX_INDEX"
+ccli transaction build \
+  --testnet-magic 2 \
+  --tx-in "$UTXO" \
+  --tx-out "$(cat keys/base.addr)+200000000" \
+  --change-address $PAYMENT_ADDR \
+  --certificate-file keys/pool-keys/deleg.cert \
+  --witness-override 2 \
+  --out-file /workspace/transactions/deleg.txbody
+
+# Sign with payment key + stake key
+ccli transaction sign \
+  --tx-body-file /workspace/transactions/deleg.txbody \
+  --signing-key-file keys/payment.skey \
+  --signing-key-file keys/pool-keys/stake.skey \
+  --testnet-magic 2 \
+  --out-file /workspace/transactions/deleg.tx
+
+ccli transaction submit --tx-file /workspace/transactions/deleg.tx --testnet-magic 2
+```
+
+Active Pledge updates at the next epoch boundary (~1.5 days on Preview). The 200 ADA at the base address satisfies the 100 ADA committed pledge.
+
+### 10. Verify Your Pool
 
 Generate your Pool ID in both formats and save to files.
 
