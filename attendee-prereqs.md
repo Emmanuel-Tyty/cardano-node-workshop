@@ -37,8 +37,8 @@ docker compose version     # need 2+
 ## 3. Clone the Workshop Repo
 
 ```bash
-git clone https://github.com/IntersectMBO/cardano-cli-demo.git
-cd cardano-cli-demo/workshop
+git clone https://github.com/Emmanuel-Tyty/cardano-node-workshop.git
+cd cardano-node-workshop/workshop
 ```
 
 ---
