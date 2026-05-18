@@ -1,0 +1,19 @@
+{
+  "bootstrapPeers": [],
+  "localRoots": [
+    {
+      "accessPoints": [
+        {
+          "address": "relay.pool",
+          "port": 3001
+        }
+      ],
+      "advertise": false,
+      "trustable": true,
+      "valency": 1,
+      "warmValency": 1
+    }
+  ],
+  "publicRoots": [],
+  "useLedgerAfterSlot": -1
+}

@@ -13,6 +13,10 @@ services:
     ports:
       - "3001:3001"
     restart: unless-stopped
+    networks:
+      default:
+        aliases:
+          - relay.pool
     logging:
       driver: "json-file"
       options:
@@ -23,24 +27,22 @@ services:
     image: ghcr.io/intersectmbo/cardano-node:10.1.4
     container_name: cardano-bp
     environment:
-      - NETWORK=preview
       - CARDANO_NODE_SOCKET_PATH=/ipc/bp.socket
+      - CARDANO_CONFIG=/workspace/docker/preview-config.json
+      - CARDANO_TOPOLOGY=/workspace/docker/bp-topology.json
+      - CARDANO_DATABASE_PATH=/data/db
+      - CARDANO_SOCKET_PATH=/ipc/bp.socket
+      - CARDANO_BLOCK_PRODUCER=true
+      - CARDANO_SHELLEY_KES_KEY=/workspace/keys/bp-keys/kes.skey
+      - CARDANO_SHELLEY_VRF_KEY=/workspace/keys/bp-keys/vrf.skey
+      - CARDANO_SHELLEY_OPERATIONAL_CERTIFICATE=/workspace/keys/bp-keys/node.cert
     volumes:
       - cardano-bp-data:/data/db
       - cardano-bp-ipc:/ipc
       - .:/workspace
-      - ./bp-topology.json:/config/topology.json:ro
     working_dir: /workspace
     restart: unless-stopped
-    command: >
-      run
-      --config /opt/cardano/config/preview/config.json
-      --topology /config/topology.json
-      --database-path /data/db
-      --socket-path /ipc/bp.socket
-      --shelley-kes-key /workspace/keys/bp-keys/kes.skey
-      --shelley-vrf-key /workspace/keys/bp-keys/vrf.skey
-      --shelley-operational-certificate /workspace/keys/bp-keys/node.cert
+    command: run
     logging:
       driver: "json-file"
       options:
