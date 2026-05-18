@@ -171,9 +171,23 @@ ccli stake-pool registration-certificate \
   --testnet-magic 2 \
   --pool-relay-ipv4 $RELAY_HOST \
   --pool-relay-port $RELAY_PORT \
-  --metadata-url "https://example.com/poolmeta.json" \
-  --metadata-hash "0000000000000000000000000000000000000000000000000000000000000000" \
+  --metadata-url "https://<YOUR_HOSTED_URL>/poolmeta.json" \
+  --metadata-hash "<OUTPUT_OF_HASH_COMMAND_BELOW>" \
   --out-file keys/pool-keys/pool.cert
+
+# Create the metadata file (edit name/ticker/homepage as desired)
+cat > poolmeta.json << 'EOF'
+{
+  "name": "My Pool",
+  "description": "My Cardano stake pool on Preview testnet",
+  "ticker": "MYPL",
+  "homepage": "https://example.com"
+}
+EOF
+
+# Upload poolmeta.json to a public URL (GitHub Gist, personal site, etc.)
+# then calculate the hash:
+ccli stake-pool metadata-hash --pool-metadata-file poolmeta.json
 
 # Create stake address registration certificate (deposit is 2 ADA on Preview)
 ccli stake-address registration-certificate \
