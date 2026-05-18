@@ -1,6 +1,7 @@
 services:
   cardano-relay:
     image: ghcr.io/intersectmbo/cardano-node:10.1.4
+    platform: linux/amd64
     container_name: cardano-relay
     environment:
       - NETWORK=preview
@@ -25,6 +26,7 @@ services:
 
   cardano-bp:
     image: ghcr.io/intersectmbo/cardano-node:10.1.4
+    platform: linux/amd64
     container_name: cardano-bp
     environment:
       - CARDANO_NODE_SOCKET_PATH=/ipc/bp.socket

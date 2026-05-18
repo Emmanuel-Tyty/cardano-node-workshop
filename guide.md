@@ -172,9 +172,10 @@ ccli stake-pool registration-certificate \
   --metadata-hash "0000000000000000000000000000000000000000000000000000000000000000" \
   --out-file keys/pool-keys/pool.cert
 
-# Create stake address registration certificate
+# Create stake address registration certificate (deposit is 2 ADA on Preview)
 ccli stake-address registration-certificate \
   --stake-verification-key-file keys/pool-keys/stake.vkey \
+  --key-reg-deposit-amt 2000000 \
   --out-file keys/pool-keys/stake-reg.cert
 ```
 
