@@ -62,6 +62,15 @@ docker compose logs -f cardano-relay
 
 You want `syncProgress` to show `"1.00"` before the session starts.
 
+Once the relay is fully synced, copy its database into the BP volume so the block producer does not need to download a second snapshot:
+
+```bash
+docker run --rm \
+  -v cardano-node-workshop_cardano-relay-data:/source:ro \
+  -v cardano-node-workshop_cardano-bp-data:/dest \
+  alpine sh -c "rm -rf /dest/* && cp -a /source/. /dest/"
+```
+
 ---
 
 ## 5. Verify Node is Running

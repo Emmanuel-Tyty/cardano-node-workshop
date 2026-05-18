@@ -127,9 +127,16 @@ ccli query utxo \
 
 ### 5. Start the Block-Producing Node
 
-The block producer (BP) node connects only to your relay and uses your signing keys to mint blocks. Like the relay, it auto-bootstraps via Mithril on first start.
+The block producer (BP) node connects only to your relay and uses your signing keys to mint blocks.
+
+Copy the relay's already-synced database into the BP volume so it does not need to download a second Mithril snapshot:
 
 ```bash
+docker run --rm \
+  -v cardano-node-workshop_cardano-relay-data:/source:ro \
+  -v cardano-node-workshop_cardano-bp-data:/dest \
+  alpine sh -c "rm -rf /dest/* && cp -a /source/. /dest/"
+
 docker compose up -d cardano-bp
 ```
 
