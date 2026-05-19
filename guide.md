@@ -236,6 +236,17 @@ ccli stake-address registration-certificate \
   --stake-verification-key-file keys/pool-keys/stake.vkey \
   --key-reg-deposit-amt 2000000 \
   --out-file keys/pool-keys/stake-reg.cert
+
+# 6. Generate Pool ID (needed for the delegation step)
+ccli stake-pool id \
+  --cold-verification-key-file keys/cold-keys/cold.vkey \
+  --output-format hex > keys/pool-keys/pool.id
+
+ccli stake-pool id \
+  --cold-verification-key-file keys/cold-keys/cold.vkey \
+  --output-format bech32 > keys/pool-keys/pool.id.bech32
+
+echo "Pool ID: $(cat keys/pool-keys/pool.id)"
 ```
 
 ### 8. Submit Registration Transaction
@@ -243,12 +254,10 @@ ccli stake-address registration-certificate \
 Submit the certificates to the blockchain. This requires three signatures: your payment key, your stake key, and your cold key.
 
 ```bash
-# Get UTXO from your payment address (ensure it has funds from the faucet)
 PAYMENT_ADDR=$(cat keys/payment.addr)
-ccli query utxo --address $PAYMENT_ADDR --testnet-magic 2
+UTXO=$(ccli query utxo --address $PAYMENT_ADDR --testnet-magic 2 | jq -r 'keys[0]')
+echo "Using UTXO: $UTXO"
 
-# Build transaction
-UTXO="TX_HASH#TX_INDEX"
 ccli transaction build \
   --testnet-magic 2 \
   --tx-in "$UTXO" \
@@ -258,7 +267,6 @@ ccli transaction build \
   --witness-override 3 \
   --out-file /workspace/transactions/reg.txbody
 
-# Sign transaction
 ccli transaction sign \
   --tx-body-file /workspace/transactions/reg.txbody \
   --signing-key-file keys/payment.skey \
@@ -267,7 +275,6 @@ ccli transaction sign \
   --testnet-magic 2 \
   --out-file /workspace/transactions/reg.tx
 
-# Submit
 ccli transaction submit --tx-file /workspace/transactions/reg.tx --testnet-magic 2
 ```
 
@@ -276,18 +283,15 @@ ccli transaction submit --tx-file /workspace/transactions/reg.tx --testnet-magic
 Your pool is registered but Active Pledge will show 0 until your stake key is delegated to your own pool and your base address holds enough ADA to cover the committed pledge (100 ADA).
 
 ```bash
-# Create the delegation certificate
 ccli stake-address stake-delegation-certificate \
   --stake-verification-key-file keys/pool-keys/stake.vkey \
   --stake-pool-id $(cat keys/pool-keys/pool.id) \
   --out-file keys/pool-keys/deleg.cert
 
-# Get current UTxO
 PAYMENT_ADDR=$(cat keys/payment.addr)
-ccli query utxo --address $PAYMENT_ADDR --testnet-magic 2
+UTXO=$(ccli query utxo --address $PAYMENT_ADDR --testnet-magic 2 | jq -r 'keys[0]')
+echo "Using UTXO: $UTXO"
 
-# Build: send 200 ADA to base address + submit delegation cert
-UTXO="TX_HASH#TX_INDEX"
 ccli transaction build \
   --testnet-magic 2 \
   --tx-in "$UTXO" \
@@ -297,7 +301,6 @@ ccli transaction build \
   --witness-override 2 \
   --out-file /workspace/transactions/deleg.txbody
 
-# Sign with payment key + stake key
 ccli transaction sign \
   --tx-body-file /workspace/transactions/deleg.txbody \
   --signing-key-file keys/payment.skey \
@@ -312,26 +315,11 @@ Active Pledge updates at the next epoch boundary (~1.5 days on Preview). The 200
 
 ### 10. Verify Your Pool
 
-Generate your Pool ID in both formats and save to files.
+Check your pool on the explorer using the bech32 ID:
 
 ```bash
-# Hex format (used in scripts and APIs)
-docker exec -w /workspace cardano-relay cardano-cli latest stake-pool id \
-  --cold-verification-key-file keys/cold-keys/cold.vkey \
-  --output-format hex > keys/pool-keys/pool.id
-
-# Bech32 format (human-readable, used in explorers and wallets)
-docker exec -w /workspace cardano-relay cardano-cli latest stake-pool id \
-  --cold-verification-key-file keys/cold-keys/cold.vkey \
-  --output-format bech32 > keys/pool-keys/pool.id.bech32
-
-cat keys/pool-keys/pool.id
-cat keys/pool-keys/pool.id.bech32
+echo "https://preview.cardanoscan.io/pool/$(cat keys/pool-keys/pool.id.bech32)"
 ```
-
-Check on the explorer using the bech32 ID:
-
-`https://preview.cardanoscan.io/pool/$(cat keys/pool-keys/pool.id.bech32)`
 
 ---
 
