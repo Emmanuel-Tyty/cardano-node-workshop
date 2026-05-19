@@ -110,14 +110,25 @@ ccli node issue-op-cert \
   --out-file keys/bp-keys/node.cert
 ```
 
-### 5. Generate Payment Keys
+### 5. Generate Payment and Stake Keys
 
-You need a funded payment address to pay the pool deposit and transaction fees.
+You need a funded payment address to pay the pool deposit and transaction fees, and stake keys so the base address can be built now (it combines both).
 
 ```bash
+# Payment keys
 ccli address key-gen \
   --verification-key-file keys/payment.vkey \
   --signing-key-file      keys/payment.skey
+
+# Stake keys (needed to build the base address below)
+ccli stake-address key-gen \
+  --verification-key-file keys/pool-keys/stake.vkey \
+  --signing-key-file      keys/pool-keys/stake.skey
+
+ccli stake-address build \
+  --stake-verification-key-file keys/pool-keys/stake.vkey \
+  --testnet-magic 2 \
+  --out-file keys/pool-keys/stake.addr
 ```
 
 Build two addresses — an enterprise address to receive faucet funds, and a base address that combines the payment key with your stake key. The base address is what makes your ADA count toward pledge.
